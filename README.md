@@ -1,3 +1,6 @@
+# Matlab Tool - Design of Brainwaves Detection
+#### --- Tool for design of brainwaves detection, including burst characterization, synthetic signal generation and analysis of detection
+
 ## Overview
 #### The work flow has 3 major steps: 1. Characterization, 2. Synthesis, 3. Analysis. Each step does following things:
 
