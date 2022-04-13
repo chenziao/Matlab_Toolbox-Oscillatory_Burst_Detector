@@ -13,7 +13,7 @@
 
 ## Flow chart for step 1 and 2
 
-[Flow chart for step 1 and 2](./image/FlowChart.png)
+<img src="https://raw.githubusercontent.com/chenziao/Matlab_Tool-Design_of_Brainwaves_Detection/main/image/FlowChart.png" width="620" height="500">
 
 
 ## GUI Instructions
@@ -89,7 +89,9 @@
 An example LFP data "LFP_BLA_gamma.mat" is provide in the folder "example data".
 
 After loading it as a "MAT-file" into Matlab workspace, run
+
     LFP_seg = cellfun(@(x) scale*double(x),LFP_seg,'UniformOutput',false);
+
 to scale it from integer values to microvolts.
 
 The sampling frequency is 1000 Hz, also provided as the variable "fs".
