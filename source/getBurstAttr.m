@@ -3,6 +3,7 @@ T = numel(LFP);
 
 % detect peaks
 [peaks,tpks] = Findpeaks(LFP_ASamp);
+tpks = int32(tpks);
 tpk = tpks(LFP_ASamp(tpks)>threshold);
 peak = LFP_ASamp(tpk);
 ndetect = numel(tpk);

@@ -36,15 +36,15 @@ if ~isequal(filename,0)
     save(fullfile(working_directory,filename),'SynData','SynParam');
 end
 
-%% Plot PSD
-%%{
 SynData.CompositeTrace = SynData.BackgroundTrace+SynData.SignalTrace;
 SynParam.loadrealdata;
 
+%% Plot PSD
+%%{
 [psd_bg,f,Nfft,fit_i] = SynParam.psd_background;
-[pxx_syn,f] = pwelch(SynData.CompositeTrace,Nfft*2,[],Nfft*2,SynParam.fs);
+[pxx_syn,f] = pwelch(SynData.CompositeTrace,Nfft,[],Nfft,SynParam.fs);
 pxx_syn([1,end]) = pxx_syn([1,end])*2;
-[pxx_bg,f] = pwelch(SynData.BackgroundTrace,Nfft*2,[],Nfft*2,SynParam.fs);
+[pxx_bg,f] = pwelch(SynData.BackgroundTrace,Nfft,[],Nfft,SynParam.fs);
 pxx_bg([1,end]) = pxx_bg([1,end])*2;
 
 figure(110);	hold on;
@@ -53,7 +53,7 @@ h(1) = plot(f,pow2db(psd_bg),'g');
 legend(h,{'in vivo LFP of background','synthetic LFP of background'});
 % axis([5,300,-10,40]); set(gca, 'XScale', 'log');
 xlim([0,200]);
-xlabel('Frequency (Hz)');   ylabel('Power Density (dB/Hz)');
+xlabel('Frequency (Hz)');   ylabel('PSD (dB/Hz)');
 
 figure(111);	hold on;
 plot(SynParam.rdat.f,pow2db(SynParam.rdat.PSD),'g');
@@ -62,7 +62,15 @@ plot(f,pow2db(pxx_bg),'r');
 xlim(SynParam.rdat.f(SynParam.rdat.i_fit_range));
 % axis([30,120,2,20]);
 legend({'in vivo LFP','synthetic LFP','synthetic backgound'});	%set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)');   ylabel('Power Density (dB/Hz)');
+xlabel('Frequency (Hz)');   ylabel('PSD (dB/Hz)');
+
+bump_f = SynParam.rdat.bump_f;
+bump_i = find(f>bump_f(1) & f<bump_f(2));
+intp = @(x,i) interp1(f,x,bump_f(i));
+pow_psd = @(x) trapz([bump_f(1);f(bump_i);bump_f(2)],[intp(x,1);x(bump_i);intp(x,2)]);
+pow_bg = pow_psd(pxx_bg);
+pow_sig = pow_psd(pxx_syn)-pow_bg;
+SNR = pow_sig/pow_bg;
 %}
 
 %% Characterize synthetic signal
@@ -84,11 +92,11 @@ tshow = [30,31];  % sec
 ishow = round(tshow(1)*SynParam.fs):round(tshow(2)*SynParam.fs);
 % tshow =1:5000;
 figure; hold on;
-plot(ishow*SynParam.dt,SynData.SignalTrace(ishow),'b');
 % plot(ishow*SynParam.dt,SynData.BackgroundTrace(ishow),'Color',[1,.6,.8]);
-plot(ishow*SynParam.dt,SynData.CompositeTrace(ishow),'Color',0.5*[1,1,1]);
+h(2) = plot(ishow*SynParam.dt,SynData.CompositeTrace(ishow),'Color',0.5*[1,1,1]);
+h(1) = plot(ishow*SynParam.dt,SynData.SignalTrace(ishow),'b');
 axis tight;
 xlabel('time (ms)');    ylabel('Amplitude (uV)');
-legend({'Synthetic signal','Synthetic LFP'},'Location','SouthEast');
+legend(h,{'Synthetic signal','Synthetic LFP'},'Location','SouthEast');
 
 cd(source_dir);

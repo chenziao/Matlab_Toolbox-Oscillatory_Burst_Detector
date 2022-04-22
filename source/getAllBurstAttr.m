@@ -79,13 +79,16 @@ end
 
 % Extract burst attributes
 burst_seg = cell(nseg,1);
+pks_seg_id = cell(nseg,1);
 for i = 1:nseg
     burst_seg{i} = getBurstAttr(LFP_seg{valid_seg_id(i)},LFP_ASamp{i},fs,threshold,results.bump_f,stop_perc,Nfft);
+    pks_seg_id{i} = int32(zeros(burst_seg{i}.npeak,1)+valid_seg_id(i));
 end
 burst_seg = cell2mat(burst_seg);
 FieldsSum = {'npeak','ndetect','nmerged','nvalid'};
 FieldsCat = {'peaks','tpks','AP','CN','BF'};
 stats = burst_seg(1);
+stats.pks_seg_id = cell2mat(pks_seg_id);
 for i = 1:length(FieldsSum)
     stats.(FieldsSum{i}) = sum([burst_seg.(FieldsSum{i})]);
 end
@@ -148,7 +151,8 @@ if p.Results.display
     if isempty(p.Results.threshold)
         dispfcn(num2str((threshold_auto-mean_amp)/std_amp,'Auto threshold = %.2f Z-score'));
     end
-    dispfcn(num2str((threshold-mean_amp)/std_amp,'Detection threshold = %.2f Z-score'));
+    dispfcn(num2str([threshold,(threshold-mean_amp)/std_amp],...
+        ['Detection threshold = %.5g ',char(956),'V (%.2f Z-score)']));
     dispfcn(num2str(stats.npeak/T_length,'Total AS-AP rate = %.2f Hz'));
     dispfcn(num2str(stats.ndetect/T_length,'Detected AS-AP rate = %.2f Hz --- 100%%'));
     deducted = stats.ndetect-stats.nmerged;

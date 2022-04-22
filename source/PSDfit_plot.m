@@ -45,7 +45,7 @@ leg = {'raw PSD','smoothed PSD','fit curve','fit background component',...
 if ~flag
     h = h([1:3,6]);	leg = leg([1:3,6]);
 end
-set(legend(ax,h,leg,'Location','southwest'),'Box','off');
+set(legend(ax,h,leg,'Location','southwest'),'Box','off','Color','None');
 xlabel(ax,'Freguency (Hz)');	ylabel(ax,'PSD (dB/Hz)');
 hold(ax,'off');
 

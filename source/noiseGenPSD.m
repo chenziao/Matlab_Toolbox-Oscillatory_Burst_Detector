@@ -26,10 +26,9 @@ else
 end
 fs = 2*f(end);
 if nargin < 4 || isempty(filt_n)
-    filt_n = 500;
-else
-    filt_n = max(ceil(filt_n/2)*2,6);
+    filt_n = numel(f)-1;
 end
+filt_n = max(ceil(filt_n/2)*2,6);
 if nargin < 5 || ~ischar(source_type)
     source_type = 'Gaussian';
 end
@@ -37,7 +36,7 @@ if nargin < 6 || isempty(filter_check)
     filter_check = false;
 end
 if nargin < 7 || isempty(pow_match_freq) || sum(f>=pow_match_freq(1)&f<=pow_match_freq(2))<2
-    pow_match_freq = [2*fs/filt_n,f(end)];
+    pow_match_freq = [0,f(end)]+fs/2/filt_n*[1,-1];
 end
 
 m = sqrt(PSD);
@@ -77,7 +76,7 @@ if filter_check
     plot(ff,pow2db(pxx),f,pow2db(PSD));
     legend({'Generated PSD','Desired PSD'});
     xlabel('Frequency (Hz)');
-    ylabel('Power Density (dB/Hz)');
+    ylabel('PSD (dB/Hz)');
 end
 
 end

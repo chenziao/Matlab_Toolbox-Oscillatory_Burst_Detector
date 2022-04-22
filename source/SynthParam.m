@@ -99,9 +99,9 @@ classdef SynthParam < handle
             end
             % Setup synthesization parameters.
             if obj.Fs>obj.rdat.fs
-                warndlg(['Using sampling rate greater than the real data '...
+                warndlg(['Using sampling rate greater than the in vivo data '...
                     'will cause extrapolating the power spectral density '...
-                    'beyond the Nyquist frequency of the real data.'],'Value Warning');
+                    'beyond the Nyquist frequency of the in vivo data.'],'Value Warning');
             end
             if obj.Fs<=obj.rdat.bump_f(2)*2
                 errordlg(num2str(obj.rdat.bump_f(2)*2,['Sampling rate must be ' ...
@@ -219,13 +219,13 @@ classdef SynthParam < handle
         % Calculate background PSD.
         function [PSD_bg,f,Nfft,fit_i,PSD_tot] = psd_background(obj,Fs)
             if nargin<2,    Fs = obj.Fs;	end
-            Nfft = round(Fs/2/binwidth(obj.rdat.f));
-            f = linspace(0,Fs/2,Nfft+1);
+            Nfft = 2*round(Fs/2/binwidth(obj.rdat.f));
+            f = linspace(0,Fs/2,Nfft/2+1);
             f_len = find(f<=obj.rdat.f(end),1,'last');
             PSD_fit = obj.rdat.fit_a*f.^obj.rdat.fit_b;
-            PSD_tot = [interp1(obj.rdat.f,obj.rdat.PSD_smoo,f(1:f_len)),PSD_fit(f_len+1:Nfft+1)];
+            PSD_tot = [interp1(obj.rdat.f,obj.rdat.PSD_smoo,f(1:f_len)),PSD_fit(f_len+1:Nfft/2+1)];
             fit_i = [find(f<=obj.rdat.fit_f(1),1,'last'),find(f>=obj.rdat.fit_f(2),1,'first')];
-            if length(fit_i)==1,	fit_i(2) = Nfft+1;	end
+            if length(fit_i)==1,	fit_i(2) = Nfft/2+1;	end
             PSD_bg = PSD_tot;
             PSD_bg(fit_i(1):fit_i(2)) = PSD_fit(fit_i(1):fit_i(2));
             PSD_bg(1) = 0;
@@ -299,7 +299,7 @@ classdef SynthParam < handle
                     hist_pks/obj.Syn_len/binwidth(obj.rdat.pk_amp),'b');
                 ylim(obj.fig_pkdist.ylim);
                 if newfig
-                    legend(obj.fig_pkdist.h,{'Real','Synthetic'},'Location','NorthEast');
+                    legend(obj.fig_pkdist.h,{'In Vivo','Synthetic'},'Location','NorthEast');
                 end
                 h1 = [];	h2 = [];
             else
@@ -369,7 +369,7 @@ classdef SynthParam < handle
             if ~single_plot,    subplot(211);   end
             if nargin<4
                 title(['Fit ',fit_target,' with ',amp_dist_type,' burst atoms']);
-                legend({'Real','Synthetic'},'Location','NorthEast');
+                legend({'In Vivo','Synthetic'},'Location','NorthEast');
             end
         end
         % Find distribution type with minimum divergence value
