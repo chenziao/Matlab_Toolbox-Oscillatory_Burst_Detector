@@ -10,6 +10,8 @@
 %
 % Contact Info: sm.kalami@gmail.com, info@yarpiz.com
 %
+% Adapted by Ziao Chen  (2023)
+%
 
 function out = PSO(problem, params)
 
@@ -123,7 +125,7 @@ randval = cellfun(@(x) (VarMin+VarMax)/2+(VarMax-VarMin).*...
 [particle.Position] = deal(randval{:});
 % Initialize Velocity
 if InitVel
-    randval = mat2cell(bsxfun(@times,2*rand(nPop,nVar)-1,MaxVelocity),ones(1,nPop));
+    randval = mat2cell((2*rand(nPop,nVar)-1).*MaxVelocity,ones(1,nPop));
     [particle.Velocity] = deal(randval{:});
 else
     [particle.Velocity] = deal(zeros([1,nVar]));

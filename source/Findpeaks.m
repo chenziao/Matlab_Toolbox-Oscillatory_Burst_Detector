@@ -1,9 +1,14 @@
-function [ peaks, idx ] = Findpeaks( x, threshold )
+function [ peaks, idx, trend ] = Findpeaks( x, threshold )
 trend = [sign(diff(x(:)));1];
 f_idx = find(trend==0);
-for i = length(f_idx):-1:1,
-    if trend(f_idx(i)+1)>=0, trend(f_idx(i)) = 1;	else trend(f_idx(i)) = -1; end
+for i = length(f_idx):-1:1
+    if trend(f_idx(i)+1)>=0
+        trend(f_idx(i)) = 1;
+    else
+        trend(f_idx(i)) = -1;
+    end
 end
+trend(end) = [];
 if nargout > 1
     idx = find([0;diff(trend)]==-2);
     peaks = x(idx);

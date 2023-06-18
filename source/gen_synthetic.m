@@ -28,8 +28,11 @@ SynData.BackgroundTrace = SynP.gen_background;
 
 %% Estimate number of burst constrained by power
 [Xg,PX] = SynP.copula_pdf;
-Y = Xg(:,4)*SynP.width_edge/SynP.dur_edge;
-avg_wid = PX'*Y/SynP.Dt;
+Y = Xg(:,4)/SynP.dur_edge;
+avg_wid = PX'*Y*(SynP.width_edge/SynP.Dt);
+if SynP.bl_power_match
+    Y = SynP.bl_power_prop(exp(Xg(:,3)),Y).*Y;
+end
 switch SynP.amp_dist_type
     case 'exponential'
         Y = expinv(normcdf(Xg(:,1)),DistP).^2.*Y;
@@ -38,7 +41,7 @@ switch SynP.amp_dist_type
     case 'gamma'
         Y = gaminv(normcdf(Xg(:,1)),DistP(1),DistP(2)).^2.*Y;
 end
-nburst = round(SynP.burst_energy/(PX'*Y*SynP.unit_power));
+nburst = ceil(SynP.burst_energy/(PX'*Y*SynP.unit_power));
 
 try
     userview = memory;
@@ -50,12 +53,15 @@ MemAllocate = max(MemAvailable-SynP.mem_presever,MemAvailable/2);
 Nburst_memlim = floor(MemAllocate/(avg_wid+20)/8);
 % Number of burst atoms to be generated
 Nburst = min([nburst,Nburst_memlim,SynP.maxnumsampperdim^3]);
+Nburst = max(Nburst,SynP.minnumburst);
 
-if verbose,
+if verbose
     if Nburst==Nburst_memlim
         disp(num2str(MemAllocate/1e9,'Memory allocation limit %.2f GB is reached.'));
     elseif Nburst==SynP.maxnumsampperdim^3
         disp('Maximum number of samples is reached.');
+    elseif Nburst==SynP.minnumburst
+        disp('Minimum number of samples is reached.');
     end
     disp(num2str(Nburst,'Number of burst atoms to be generated = %d.'));
     disp(num2str(nburst/SynP.Syn_len,'Rate of burst atoms = %.2f Hz.'));
@@ -80,19 +86,24 @@ switch SynP.amp_dist_type
         burstAmp = gaminv(normcdf(MVN(:,1)),DistP(1),DistP(2));
 end
 if SynP.empr_CN
-    burstCycNum = exp(interp1(SynP.rdat.cdf_cyc,SynP.rdat.log_cyc,normcdf(MVN(:,2))));
+    burstCycNum = exp(interp1(SynP.rdat.cdf_log_CN,SynP.rdat.log_CNs,normcdf(MVN(:,2))));
 else
     burstCycNum = exp(MVN(:,2)*SynP.sigma(2)+SynP.mu(2));
 end
 if SynP.empr_BF
-    burstFreq = exp(interp1(SynP.rdat.cdf_frq,SynP.rdat.log_frq,normcdf(MVN(:,3))));
+    burstFreq = exp(interp1(SynP.rdat.cdf_log_BF,SynP.rdat.log_BFs,normcdf(MVN(:,3))));
 else
     burstFreq = exp(MVN(:,3)*SynP.sigma(3)+SynP.mu(3));
 end
 Duration1sig = burstCycNum./burstFreq/SynP.dur_edge;
 
 if SynP.power_match
-    cumpow = cumsum(SynP.unit_power*SynP.width_edge*Duration1sig.*burstAmp.^2);
+    if SynP.bl_power_match
+        cumpow = cumsum(SynP.unit_power*Duration1sig.*burstAmp.^2 ...
+            .*SynP.bl_power_prop(burstFreq,Duration1sig));
+    else
+        cumpow = cumsum(SynP.unit_power*Duration1sig.*burstAmp.^2);
+    end
     nb = find(cumpow>=mod(SynP.burst_energy,cumpow(end)),1,'first');
     M = floor(SynP.burst_energy/cumpow(end));
     nburst = M*Nburst+nb;

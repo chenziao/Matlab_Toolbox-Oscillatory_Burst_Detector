@@ -1,5 +1,5 @@
 function param = fitdist_trunc( data,pdffun,cdffun,min_max,start )
-% Fitting the truncated customized distribution to the data
+% Fit truncated customized distribution to the data
 % data - input data
 % pdffun - pdf function of desired distribution type
 % cdffun - pdf function of desired distribution type

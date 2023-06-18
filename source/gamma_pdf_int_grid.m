@@ -83,7 +83,7 @@ end
         else
             branch = -1*(k>1);
             try
-                x = -t*lambertw(branch,-(y*gam_k).^(1/t)/t);
+                x = -t*real(lambertw(branch,-(y*gam_k).^(1/t)/t));
                 flag = ~isfinite(x);
             catch
                 flag = true;

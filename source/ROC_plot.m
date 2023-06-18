@@ -4,9 +4,9 @@ validStruct = @(x) validateattributes(x,{'struct'},{'scalar'});
 validTF = @(x) validateattributes(x,{'logical','numeric'},{'scalar'});
 addRequired(p,'DetectionResult',validStruct);
 addOptional(p,'Threshold',[],@(x) validateattributes(x,{'numeric'},{'scalar','nonnegative'}));
-addParamValue(p,'plot_dist',true,validTF);
-addParamValue(p,'axes',[]);
-addParamValue(p,'h',[]);
+addParameter(p,'plot_dist',true,validTF);
+addParameter(p,'axes',[]);
+addParameter(p,'h',[]);
 parse(p,DetectionResult,varargin{:});
 
 Threshold = p.Results.Threshold;
@@ -32,9 +32,6 @@ elseif size(h,1)<plot_dist+1
     h{2,2} = 0;
 end
 if isempty(Threshold)
-    for i = 1:numel(axes)
-        cla(axes(i),'reset');
-    end
     Threshold = DetectionResult.max_amp;
 else
     Threshold = min(Threshold,DetectionResult.max_amp);
@@ -43,7 +40,8 @@ else
     end
 end
 
-Detect_ASAP = DetectionResult.Detect_ASAP;
+Custom_Detect = isfield(DetectionResult,'Custom_Detect') && DetectionResult.Custom_Detect;
+Detect_AP = DetectionResult.Detect_AP;
 fpr = DetectionResult.fpr;
 tpr = DetectionResult.tpr;
 
@@ -52,7 +50,7 @@ hold(ax,'on');
 if newplot
     pfpr = 100/fpr(1)*fpr;
     ptpr = 100/tpr(1)*tpr;
-    if Detect_ASAP, colororder(ax,{'k','k'});	end
+    if Detect_AP, colororder(ax,{'k','k'});	end
     hh = zeros(1,3);
     hh(1) = plot(ax,pfpr,ptpr,'b');
     hh(2) = plot(ax,[0,100],[0,100],':','color',0.5*[1,1,1]);
@@ -62,7 +60,7 @@ if newplot
     xlim(ax,[0,100]);   ylim(ax,[0,100]);
     xlabel(ax,'False positive rate (%)');
     ylabel(ax,'True positive rate (%)');
-    if Detect_ASAP
+    if Detect_AP
         hh = [hh(1:2),0,hh(3),0];
         yyaxis(ax,'right')
         hh(3) = plot(ax,[0,100*tpr(1)/fpr(1)],[0,tpr(1)],'--','color',0.5*[1,1,1]);
@@ -81,7 +79,7 @@ TPR = 100/tpr(1)*interp1(DetectionResult.thresholds,tpr,Threshold,[],0);
 h{1,2} = plot(ax,FPR,TPR,'ro');
 hh = [h{1,1},h{1,2}];
 
-if Detect_ASAP
+if Detect_AP
     leg = {'ROC','Random','TP rate = FP rate (Hz)','Maximum Youden''s index', ...
         'Youden''s index in Hz','Operating point'};
 else
@@ -94,7 +92,8 @@ if plot_dist
     % Define patches
     nthresh = DetectionResult.nthresh;
     ctrs_thr = DetectionResult.ctrs_thr;
-    v2 = [[repmat(ctrs_thr',4,1),DetectionResult.cds(:)];[0,0;DetectionResult.max_amp,0]];
+    v2 = [[repmat(ctrs_thr',4,1),DetectionResult.cds(:)]; ...
+        [DetectionResult.thresholds(1),0;DetectionResult.max_amp,0]];
     f2 = zeros(3,nthresh*2+2);
     endpt = 4*nthresh+[1,2];
     for i = 1:3
@@ -117,12 +116,17 @@ if plot_dist
         for i = 3:-1:1
             plot(axh,CDS(i,1),CDS(i,2),'color',cmap2(i,:));
         end
-        if Detect_ASAP
-            xlabel(axh,'AS-AP Amplitude (\muV)');
-            ylabel(axh,'Rate density (Hz/\muV)');
+        unit = DetectionResult.unit;
+        if Detect_AP
+            xlabel(axh,['Amplitude peak (',unit,')']);
+            ylabel(axh,['Rate density (Hz/',unit,')']);
         else
-            xlabel(axh,'AS Amplitude (\muV)');
-            ylabel(axh,'Probability Density (\muV^{-1})');
+            if Custom_Detect
+                xlabel(axh,'Custom detection signal');
+            else
+                xlabel(axh,['Amplitude (',unit,')']);
+            end
+            ylabel(axh,['Probability density (',unit,'^{-1})']);
         end
     end
     

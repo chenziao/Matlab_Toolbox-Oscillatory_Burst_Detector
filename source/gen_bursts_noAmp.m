@@ -24,20 +24,23 @@ verbose = logical(verbose);
 
 %% Estimate number of burst constrained by power
 SynP.copula_pdf;
-Y = SynP.buffer.Xg(:,4)*SynP.width_edge/SynP.dur_edge;
-avg_wid = SynP.buffer.PX'*Y/SynP.Dt;
+Y = SynP.cache.Xg(:,4)/SynP.dur_edge;
+avg_wid = SynP.cache.PX'*Y*(SynP.width_edge/SynP.Dt);
+if SynP.bl_power_match
+    Y = SynP.bl_power_prop(exp(SynP.cache.Xg(:,3)),Y).*Y;
+end
 if isempty(LB)
     Nburst = inf;
 else
     switch SynP.amp_dist_type
         case 'exponential'
-            Y = expinv(normcdf(SynP.buffer.Xg(:,1)),LB).^2.*Y;
+            Y = expinv(normcdf(SynP.cache.Xg(:,1)),LB).^2.*Y;
         case 'lognormal'
-            Y = exp((SynP.buffer.Xg(:,1)*LB(2)+LB(1))*2).*Y;
+            Y = exp((SynP.cache.Xg(:,1)*LB(2)+LB(1))*2).*Y;
         case 'gamma'
-            Y = gaminv(normcdf(SynP.buffer.Xg(:,1)),LB(1),LB(2)).^2.*Y;
+            Y = gaminv(normcdf(SynP.cache.Xg(:,1)),LB(1),LB(2)).^2.*Y;
     end
-    Nburst = round(SynP.burst_energy/(SynP.buffer.PX'*Y*SynP.unit_power));
+    Nburst = ceil(SynP.burst_energy/(SynP.cache.PX'*Y*SynP.unit_power));
 end
 
 try
@@ -51,44 +54,58 @@ end
 MemAllocate = max(MemAvailable-SynP.mem_presever,MemAvailable/2);
 Nburst_memlim = floor(MemAllocate/(avg_wid+20)/8);
 % Number of burst atoms to be generated
-SynP.buffer.Nburst = min([Nburst,Nburst_memlim,SynP.maxnumsampperdim^3]);
+SynP.cache.Nburst = min([Nburst,Nburst_memlim,SynP.maxnumsampperdim^3]);
+SynP.cache.Nburst = max(SynP.cache.Nburst,SynP.minnumburst);
 
 if verbose
-    if SynP.buffer.Nburst==Nburst_memlim
+    if SynP.cache.Nburst==Nburst_memlim
         disp(num2str(MemAllocate/1e9,'Memory allocation limit %.2f GB is reached.'));
-    elseif SynP.buffer.Nburst==SynP.maxnumsampperdim^3
+    elseif SynP.cache.Nburst==SynP.maxnumsampperdim^3
         disp('Maximum number of samples is reached.');
+    elseif SynP.cache.Nburst==SynP.minnumburst
+        disp('Minimum number of samples is reached.');
     end
-    disp(num2str(SynP.buffer.Nburst,'Number of burst atoms to be generated = %d.'));
+    disp(num2str(SynP.cache.Nburst,'Number of burst atoms to be generated = %d.'));
 end
+
+%% Background energy
+[PSD_bg,f,Nfft,bg_range_i] = SynP.psd_background;
+if SynP.bl_power_match
+    sig_range_f = SynP.rdat.sig_range_f;
+    bg_range_i = [find(f>sig_range_f(1),1,'first'),find(f<sig_range_f(2),1,'last')];
+    bg_range_i = [Nfft/2+2,bg_range_i(1):bg_range_i(2),Nfft/2+3];
+    PSD_bg = [PSD_bg,SynP.rdat.sig_range_f];
+    f = [f,sig_range_f];
+end
+SynP.cache.background_energy = trapz(f(bg_range_i),PSD_bg(bg_range_i))*SynP.Syn_len;
 
 %% Generate Gaussian Copula and burst atom properties
 % Set random seed for copula
 if ~isempty(SynP.randseed),	rng(SynP.randseed+2);	end
 if SynP.correlated
-    SynP.buffer.MVN = mvnrnd([0,0,0],SynP.sigcov,SynP.buffer.Nburst);
+    SynP.cache.MVN = mvnrnd([0,0,0],SynP.sigcov,SynP.cache.Nburst);
 else
-    SynP.buffer.MVN = randn([SynP.buffer.Nburst,3]);
+    SynP.cache.MVN = randn([SynP.cache.Nburst,3]);
 end
-rndPhase = rand(SynP.buffer.Nburst,1);
+rndPhase = rand(SynP.cache.Nburst,1);
 
-SynP.buffer.burstCycNum = exp(SynP.buffer.MVN(:,2)*SynP.sigma(2)+SynP.mu(2));
+SynP.cache.burstCycNum = exp(SynP.cache.MVN(:,2)*SynP.sigma(2)+SynP.mu(2));
 if SynP.empr_CN
-    SynP.buffer.burstCycNum = exp(interp1(SynP.rdat.cdf_cyc,SynP.rdat.log_cyc,normcdf(SynP.buffer.MVN(:,2))));
+    SynP.cache.burstCycNum = exp(interp1(SynP.rdat.cdf_log_CN,SynP.rdat.log_CNs,normcdf(SynP.cache.MVN(:,2))));
 else
-    SynP.buffer.burstCycNum = exp(SynP.buffer.MVN(:,2)*SynP.sigma(2)+SynP.mu(2));
+    SynP.cache.burstCycNum = exp(SynP.cache.MVN(:,2)*SynP.sigma(2)+SynP.mu(2));
 end
 if SynP.empr_BF
-    SynP.buffer.burstFreq = exp(interp1(SynP.rdat.cdf_frq,SynP.rdat.log_frq,normcdf(SynP.buffer.MVN(:,3))));
+    SynP.cache.burstFreq = exp(interp1(SynP.rdat.cdf_log_BF,SynP.rdat.log_BFs,normcdf(SynP.cache.MVN(:,3))));
 else
-    SynP.buffer.burstFreq = exp(SynP.buffer.MVN(:,3)*SynP.sigma(3)+SynP.mu(3));
+    SynP.cache.burstFreq = exp(SynP.cache.MVN(:,3)*SynP.sigma(3)+SynP.mu(3));
 end
-SynP.buffer.Duration1sig = SynP.buffer.burstCycNum./SynP.buffer.burstFreq/SynP.dur_edge;
-SynP.buffer.wid = floor(SynP.width_edge/SynP.Dt*SynP.buffer.Duration1sig)+1;
-SynP.buffer.ctr = ceil((SynP.buffer.wid+1)/2);
-sgl_ind = cumsum(SynP.buffer.wid);
-SynP.buffer.sgl_ind = [[1;sgl_ind(1:end-1)+1],sgl_ind];
-SynP.buffer.sgl_burst = zeros(sum(SynP.buffer.wid),1);
+SynP.cache.Duration1sig = SynP.cache.burstCycNum./SynP.cache.burstFreq/SynP.dur_edge;
+SynP.cache.wid = floor(SynP.width_edge/SynP.Dt*SynP.cache.Duration1sig)+1;
+SynP.cache.ctr = ceil((SynP.cache.wid+1)/2);
+sgl_ind = cumsum(SynP.cache.wid);
+SynP.cache.sgl_ind = [[1;sgl_ind(1:end-1)+1],sgl_ind];
+SynP.cache.sgl_burst = zeros(sum(SynP.cache.wid),1);
 
 %% Generate unit amplitude atoms
 npdf = 1000;
@@ -96,13 +113,13 @@ PDF = normpdf(linspace(-SynP.width_edge,SynP.width_edge,2*SynP.width_edge*npdf+1
 if verbose
     disp(['Generating bursts ---',repmat(' ',1,19)]);
     bksp = repmat('\b',1,19);
-    prog = -1;	prog_1000 = SynP.buffer.Nburst/1000;	tic;
+    prog = -1;	prog_1000 = SynP.cache.Nburst/1000;	tic;
 end
-for i = 1:SynP.buffer.Nburst
-    tPts = (0:(SynP.buffer.wid(i)-1))';
-    SynP.buffer.sgl_burst(SynP.buffer.sgl_ind(i,1):SynP.buffer.sgl_ind(i,2))...
-        = PDF(round(SynP.Dt/SynP.buffer.Duration1sig(i)*2*npdf*tPts+1))...
-        .*sin(2*pi*(SynP.buffer.burstFreq(i)*SynP.Dt*tPts+rndPhase(i)));
+for i = 1:SynP.cache.Nburst
+    tPts = (0:(SynP.cache.wid(i)-1))';
+    SynP.cache.sgl_burst(SynP.cache.sgl_ind(i,1):SynP.cache.sgl_ind(i,2))...
+        = PDF(round(SynP.Dt/SynP.cache.Duration1sig(i)*2*npdf*tPts+1))...
+        .*sin(2*pi*(SynP.cache.burstFreq(i)*SynP.Dt*tPts+rndPhase(i)));
     
     if verbose
         progcurr = floor(i/prog_1000);
@@ -116,8 +133,8 @@ if verbose,	fprintf([bksp,'%5.1f%% - %6.2f sec\n'],100,toc);	end
 
 % Set random seed for bursts drawing
 if ~isempty(SynP.randseed), rng(SynP.randseed+3);	end
-SynP.buffer.initrandstate = rng;	% record random state for inserting
-SynP.buffer.randstate = SynP.buffer.initrandstate;
+SynP.cache.initrandstate = rng;	% record random state for inserting
+SynP.cache.randstate = SynP.cache.initrandstate;
 
 %% Check memory left
 if verbose && Windows
