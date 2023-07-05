@@ -151,7 +151,11 @@ if plot_dist
     idx_lines = strcmp(get(hhh,'Type'),'line') & hhh~=hh(end);
     set(axh,'Children',[hhh(idx_lines);hhh(~idx_lines)]);
     
-    leg = {'False peaks','Intermediate peaks','True peaks','Detection threshold'};
+    if Detect_AP
+        leg = {'False peaks','Intermediate peaks','True peaks','Detection threshold'};
+    else
+        leg = {'False','Intermediate','True','Detection threshold'};
+    end
     legend(axh,hh,leg,'Location','NorthEast');
 end
 
