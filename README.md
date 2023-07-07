@@ -19,6 +19,14 @@
 
 Use the MATLAB App installer [*Oscillatory Burst Detector.mlappinstall*](https://github.com/chenziao/Matlab_Toolbox-Oscillatory_Burst_Detector/blob/main/Oscillatory%20Burst%20Detector.mlappinstall).
 
+#### Dependencies
+
+[Signal Processing Toolbox](https://www.mathworks.com/products/signal.html)
+
+[Statistics and Machine Learning Toolbox](https://www.mathworks.com/products/statistics.html)
+
+(Optional) [FOOOF - fitting oscillations & one over f](https://fooof-tools.github.io/fooof/)
+
 ## User Mannual
 
 See the document [User Manual.pdf](User%20Manual.pdf).
