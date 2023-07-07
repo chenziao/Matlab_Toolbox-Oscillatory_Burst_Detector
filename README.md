@@ -1,4 +1,4 @@
-# Matlab Tool - Design of Brainwaves Detection
+# Matlab Toolbox - Oscillatory Burst Detector
 #### --- Tool with algorithms to design detection of oscillatory bursts in LFP signals, including burst characterization, synthetic signal generation and analysis of detection
 
 ## Overview
@@ -13,8 +13,11 @@
 
 ## Flow chart for step 1 and 2
 
-<img src="https://raw.githubusercontent.com/chenziao/Matlab_Tool-Design_of_Brainwaves_Detection/main/image/FlowChart.png" width="625" height="498">
+<img src="https://raw.githubusercontent.com/chenziao/Matlab_Toolbox-Oscillatory_Burst_Detector/main/image/FlowChart.png" width="625" height="498">
 
+## Installation
+
+Use the MATLAB App installer [*Oscillatory Burst Detector.mlappinstall*](https://github.com/chenziao/Matlab_Toolbox-Oscillatory_Burst_Detector/blob/main/Oscillatory%20Burst%20Detector.mlappinstall).
 
 ## User Mannual
 
