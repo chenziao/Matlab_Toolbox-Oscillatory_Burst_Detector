@@ -10,6 +10,7 @@
 
 3.	Analyze the synthetic data generated from the previous step for evaluating detection. Define the ground truth with lower and upper bounds in the synthetic signal trace and evaluate detection performance on the composite trace using a receiver operating characteristic (ROC) curve. The relation between detection threshold and true/false positive rates will be shown.
 
+[Chen, Ziao, Drew B. Headley, Luisa F. Gomez-Alatorre, Vasiliki Kanta, K. C. Ho, Denis Pare, and Satish S. Nair. "Approaches to characterizing oscillatory burst detection algorithms for electrophysiological recordings." *Journal of Neuroscience Methods* 391 (2023): 109865.](https://www.sciencedirect.com/science/article/abs/pii/S0165027023000845)
 
 ## Flow chart for step 1 and 2
 
