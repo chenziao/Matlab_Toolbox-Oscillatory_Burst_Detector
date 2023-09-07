@@ -31,3 +31,7 @@ Use the MATLAB App installer [*Oscillatory Burst Detector.mlappinstall*](https:/
 ## User Mannual
 
 See the document [User Manual.pdf](User%20Manual.pdf).
+
+## Video Instructions
+
+[Video - How to Use the Oscillatory Burst Detector Toolbox](https://youtu.be/PLZBNLYgZhY)
