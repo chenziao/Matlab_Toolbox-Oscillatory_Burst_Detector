@@ -48,6 +48,7 @@ disp(num2str(BoundStats.nsigma_bound,'¦È_L = %.2f¦Ò, ¦È_U = %.2f¦Ò'));
 %% Detection
 detection_AP = getDetection(SynStats,BoundStats,'Detect_AP',true);
 detection_amp = getDetection(SynStats,BoundStats,'Detect_AP',false);
+
 % % Example for customized detection method
 % LFP_filt = filtfilt(SynParam.sos,SynParam.g,SynData.CompositeTrace);    % filtered trace
 % [trs,ttr] = findpeaks(-LFP_filt);  % detect on amplitude only at troughs
@@ -56,8 +57,17 @@ detection_amp = getDetection(SynStats,BoundStats,'Detect_AP',false);
 % detection_amp = getDetection(Custom_Detect,BoundStats);
 
 %% Plot
-ZS_threshold = 1;
-Threshold = SynStats.amp_mean(3)+ZS_threshold*SynStats.amp_sigma(3);
+% % Evaluate at 2 Z-score threshold
+% ZS_threshold = 2;
+% Threshold = SynStats.amp_mean(3)+ZS_threshold*SynStats.amp_sigma(3);
+% disp(num2str([ZS_threshold,Threshold],['Use %g Z-score threshold: %.4g ',SynStats.unit]))
+
+% Optimal threshold by maximum Youden's index
+Threshold = detection_AP.thresholds(detection_AP.Youden);   % Youden in percentage
+% Threshold = detection_AP.thresholds(detection_AP.Youden2);  % Youden in rate (Hz)
+% Threshold = detection_amp.thresholds(detection_amp.Youden);
+ZS_threshold = (Threshold-SynStats.amp_mean(3))/SynStats.amp_sigma(3);
+disp(num2str([ZS_threshold,Threshold],['Use optimal threshold: %.3g Z-score, %.4g ',SynStats.unit]));
 
 [ax,h] = ROC_plot(detection_AP);
 [ax,h] = ROC_plot(detection_AP,Threshold,'axes',ax,'h',h);

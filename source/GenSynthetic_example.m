@@ -75,6 +75,7 @@ pow_psd = @(x) trapz([sig_range_f(1);f(sig_range_i);sig_range_f(2)], ...
 pow_bg = pow_psd(pxx_bg);
 pow_sig = pow_psd(pxx_syn)-pow_bg;
 SNR = pow_sig/pow_bg;
+disp(['Signal Noise Ratio: ',num2str(SNR,'%.2f '),' (',num2str(pow2db(SNR),'%.2f '),' dB)']);
 %}
 
 %% Characterize synthetic signal

@@ -14,19 +14,16 @@
 
 ## Flow chart for step 1 and 2
 
-<img src="https://raw.githubusercontent.com/chenziao/Matlab_Toolbox-Oscillatory_Burst_Detector/main/image/FlowChart.png" width="625" height="498">
+![FlowChart](image/FlowChart.png)
 
 ## Installation
 
-Use the MATLAB App installer [*Oscillatory Burst Detector.mlappinstall*](https://github.com/chenziao/Matlab_Toolbox-Oscillatory_Burst_Detector/blob/main/Oscillatory%20Burst%20Detector.mlappinstall).
+Use the MATLAB App installer [*Oscillatory Burst Detector.mlappinstall*](Oscillatory%20Burst%20Detector.mlappinstall).
 
 #### Dependencies
-
-[Signal Processing Toolbox](https://www.mathworks.com/products/signal.html)
-
-[Statistics and Machine Learning Toolbox](https://www.mathworks.com/products/statistics.html)
-
-(Optional) [FOOOF - fitting oscillations & one over f](https://fooof-tools.github.io/fooof/)
+[Signal Processing Toolbox](https://www.mathworks.com/products/signal.html)  
+[Statistics and Machine Learning Toolbox](https://www.mathworks.com/products/statistics.html)  
+(Optional) [FOOOF - fitting oscillations & one over f (version v0.X.X)](https://fooof-tools.github.io/fooof/)
 
 ## User Mannual
 
@@ -35,3 +32,20 @@ See the document [User Manual.pdf](User%20Manual.pdf).
 ## Video Instructions
 
 [Video - How to Use the Oscillatory Burst Detector Toolbox](https://youtu.be/PLZBNLYgZhY)
+
+## Source Code and Example
+
+The source codes are in the folder [source](source).
+
+Most of the functions used by the GUI have descriptive comments inside their source codes. To run the
+algorithm without using the GUI, run the example scripts in the following order:
+
+1. [*"CharaterizeInVivo_example.m"*](source/CharaterizeInVivo_example.m) - Step 1 in the GUI.  
+[*"CharaterizeInVivo_fooof_example.m"*](source/CharaterizeInVivo_fooof_example.m) - An alternative method for fitting the PSD in step 1 using [FOOOF](https://fooof-tools.github.io/fooof/) algorithm. You need to install the package first. This script runs FOOOF using a [MATLAB wrapper](https://github.com/fooof-tools/fooof_mat).
+
+2. [*"AmpDistParamOptimization_example.m"*](source/AmpDistParamOptimization_example.m) - Step 2 in the GUI.  
+[*"GenSynthetic_example.m"*](source/GenSynthetic_example.m) - (Optional) Generates and characterizes the synthetic data.  
+The class ***SynthParam*** defined in [*"SynthParam.m"*](source/SynthParam.m) plays a central role in generating the synthetic data.
+
+3. [*"Synthetic_Analysis_example.m"*](source/Synthetic_Analysis_example.m) - Step 3 in the GUI.  
+This script can be adapted for customized threshold-crossing detection method (see the example in [___Example for customized detection method___](source/Synthetic_Analysis_example.m#L52)). To use customized detection method, you need to first obtain a sequence of target values and corresponding threshold levels. If the target sequence is a time series, it should have the same sampling frequency as the signal being analyzed. The target sequence can also be a point process, and you need to additionally provide the corresponding time indices of the events in such case.

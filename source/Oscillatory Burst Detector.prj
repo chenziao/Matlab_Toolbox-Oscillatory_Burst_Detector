@@ -1,0 +1,115 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="2410742075" file="D:\我的文件\研究生文档\Research\Brainwave Detection\GammaDetection\Oscillatory Burst Detector.prj" location="D:\我的文件\研究生文档\Research\Brainwave Detection\GammaDetection" name="Oscillatory Burst Detector" target="target.mlapps" target-name="Package App">
+    <param.appname>Oscillatory Burst Detector</param.appname>
+    <param.authnamewatermark>Ziao Chen</param.authnamewatermark>
+    <param.email>zc963@mail.missouri.edu; chen8a803@gmail.com</param.email>
+    <param.company>University of Missouri, Columbia MO</param.company>
+    <param.icon />
+    <param.icons />
+    <param.summary>Tool with algorithms to design detection of oscillatory bursts in LFP signals, including burst characterization, synthetic signal generation</param.summary>
+    <param.description>The work flow has 3 major steps: 1. Characterization, 2. Synthesis, 3. Analysis, as follows:
+
+1. Select local field potential (LFP) recording as input. Run the algorithm to fit power spectral density (PSD), decompose the PSD into signal and background components. Then characterize bursts properties, including statistics of amplitude peaks, number of cycles and burst frequency. Finally, save the characterization results.
+
+2. Load results from the previous step. Specify parameters for synthesizing the background component and oscillatory signal component. Then perform an optimization for amplitude peak distribution parameters of burst atoms to be generated in the signal component. This step is essential for the synthetic data to reproduce the amplitude distribution of the observed data. There are three candidate types of parametric distribution for the burst atom amplitude: gamma, lognormal and exponential. Gamma distribution works well in general. The goodness of fit is indicated by Kullback–Leibler divergence (KL) or Jensen–Shannon divergence (JS). Lower divergence value indicates better fit. Then synthetic LFP is generated with optimized parameters and the resulting properties including PSD and burst statistics are visualized as in step 1. Finally, save the synthesis parameters and data.
+
+3. Analyze the synthetic data generated from the previous step for evaluating detection. Define the ground truth with lower and upper bounds in the synthetic signal trace and evaluate detection performance on the composite trace using a receiver operating characteristic (ROC) curve. The relation between detection threshold and true/false positive rates will be shown.</param.description>
+    <param.screenshot>${PROJECT_ROOT}\gui_dev\step1_startup.png</param.screenshot>
+    <param.version>1.2</param.version>
+    <param.products.name>
+      <item>MATLAB</item>
+      <item>Signal Processing Toolbox</item>
+      <item>Statistics and Machine Learning Toolbox</item>
+    </param.products.name>
+    <param.products.id>
+      <item>1</item>
+      <item>8</item>
+      <item>19</item>
+    </param.products.id>
+    <param.products.version>
+      <item>9.13</item>
+      <item>9.1</item>
+      <item>12.4</item>
+    </param.products.version>
+    <param.platforms />
+    <param.output>${PROJECT_ROOT}</param.output>
+    <param.guid>d42907f0-7d3c-4068-bef3-96d3a35f8168</param.guid>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\gui.mlapp</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>${PROJECT_ROOT}\bincenters.m</file>
+      <file>${PROJECT_ROOT}\binwidth.m</file>
+      <file>${PROJECT_ROOT}\eval_amp_dist.m</file>
+      <file>${PROJECT_ROOT}\Findpeaks.m</file>
+      <file>${PROJECT_ROOT}\fitdist_trunc.m</file>
+      <file>${PROJECT_ROOT}\gamma_pdf_int_grid.m</file>
+      <file>${PROJECT_ROOT}\gen_bursts_noAmp.m</file>
+      <file>${PROJECT_ROOT}\gen_synthetic.m</file>
+      <file>${PROJECT_ROOT}\getAllBurstAttr.m</file>
+      <file>${PROJECT_ROOT}\getBackgroundFit.m</file>
+      <file>${PROJECT_ROOT}\getBurstAttr.m</file>
+      <file>${PROJECT_ROOT}\getBurstDistributions.m</file>
+      <file>${PROJECT_ROOT}\getDetection.m</file>
+      <file>${PROJECT_ROOT}\getDurations.m</file>
+      <file>${PROJECT_ROOT}\getFOOOFcomponents.m</file>
+      <file>${PROJECT_ROOT}\getPreselectedBounds.m</file>
+      <file>${PROJECT_ROOT}\getPSDcomponents.m</file>
+      <file>${PROJECT_ROOT}\getPSDcomponents_fooof.m</file>
+      <file>${PROJECT_ROOT}\getPSDestimation.m</file>
+      <file>${PROJECT_ROOT}\getSyntheticStats.m</file>
+      <file>${PROJECT_ROOT}\gui_options1_1.mlapp</file>
+      <file>${PROJECT_ROOT}\gui_options1_2.mlapp</file>
+      <file>${PROJECT_ROOT}\gui_options2_1.mlapp</file>
+      <file>${PROJECT_ROOT}\gui_options2_2.mlapp</file>
+      <file>${PROJECT_ROOT}\gui_savefig.mlapp</file>
+      <file>${PROJECT_ROOT}\ind2seg.m</file>
+      <file>${PROJECT_ROOT}\JSDiv.m</file>
+      <file>${PROJECT_ROOT}\KLDiv.m</file>
+      <file>${PROJECT_ROOT}\maxwboltzcdf.m</file>
+      <file>${PROJECT_ROOT}\maxwboltzpdf.m</file>
+      <file>${PROJECT_ROOT}\ncxpdf_cond_gam.m</file>
+      <file>${PROJECT_ROOT}\noiseGenPSD.m</file>
+      <file>${PROJECT_ROOT}\PSDcutoff.m</file>
+      <file>${PROJECT_ROOT}\PSDfit.m</file>
+      <file>${PROJECT_ROOT}\PSDfit_plot.m</file>
+      <file>${PROJECT_ROOT}\PSO.m</file>
+      <file>${PROJECT_ROOT}\ROC_plot.m</file>
+      <file>${PROJECT_ROOT}\runAmpDistOptim.m</file>
+      <file>${PROJECT_ROOT}\SynthParam.m</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\fooof_mat\fooof_mat</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file location="D:\我的文件\研究生文档\Research\Brainwave Detection" name="GammaDetection" optional="false">D:\我的文件\研究生文档\Research\Brainwave Detection\GammaDetection</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>E:\Program Files\MATLAB\R2022b</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
